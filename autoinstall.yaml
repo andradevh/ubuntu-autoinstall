@@ -1,50 +1,56 @@
 #cloud-config
 autoinstall:
-    version: 1
-    identity:
-        realname: 'Admin'
-        hostname: ubuntu-desktop
-        username: admin
-        password: '$y$j9T$uhkxlm8nUQaNu.6rl4k2d.$DIldpYy96OHg8lFjfXfc671BZcGWkPOmaDONGAhGSg3' 
-    locale: en_US.utf8
-    keyboard:
-        layout: us
-        variant: intl
-    timezone: "America/Sao_Paulo"   
-    packages:
-        - git
-        - wget
-        - btop
-        - curl
-        - bat
-        - tldr
-        - micro
-        - ripgrep
-        - duf
-        - ncdu
-        - exa
-    snaps:
-        - name: spotify
-          channel: stable
-          classic: false
-        - name: code
-          channel: stable
-          classic: true  
-        - name: discord
-          channel: stable
-    late-commands:
+  version: 1
+  identity:
+    realname: 'Admin'
+    hostname: ubuntu-desktop
+    username: admin
+    password: '$y$j9T$uhkxlm8nUQaNu.6rl4k2d.$DIldpYy96OHg8lFjfXfc671BZcGWkPOmaDONGAhGSg3'
+  locale: en_US.utf8
+  keyboard:
+    layout: us
+    variant: intl
+  timezone: "America/Sao_Paulo"
+  apt:
+    primary:
+      - arches: [default]
+        uri: http://br.archive.ubuntu.com/ubuntu/
+    sources:
+      universe: { source: "deb http://br.archive.ubuntu.com/ubuntu $RELEASE universe" }
+      multiverse: { source: "deb http://br.archive.ubuntu.com/ubuntu $RELEASE multiverse" }
+  packages:
+    - git
+    - wget
+    - btop
+    - curl
+    - bat
+    - tldr
+    - micro
+    - ripgrep
+    - duf
+    - ncdu
+    - eza
+    - ubuntu-restricted-extras
+  snaps:
+    - name: spotify
+      channel: stable
+      classic: false
+    - name: code
+      channel: stable
+      classic: true
+    - name: discord
+      channel: stable
+  drivers:
+    install: true
+  late-commands:
     - |
-      echo "Instalando Brave Browser..."
-      curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
-      echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | tee /etc/apt/sources.list.d/brave-browser-release.list
-      apt update
-      apt install -y brave-browser
-      echo "Brave Browser instalado."
-
-    codecs:
-        install: true
-    drivers:
-        install: true
-    updates: all
-    shutdown: reboot
-
+      curtin in-target -- sh -c '
+        curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+        echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | tee /etc/apt/sources.list.d/brave-browser-release.list
+        apt-get update
+        apt-get install -y brave-browser
+      '
+    - |
+      curtin in-target -- sh -c 'echo "alias exa=\"eza --icons\"" >> /home/admin/.bashrc'
+  updates: all
+  shutdown: reboot
